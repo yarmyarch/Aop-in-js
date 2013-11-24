@@ -33,22 +33,23 @@ This aspect will return it's returned value for next usage (input to the next as
 
 #### AopUtil.before
 Add a before aspect that would be executed before the original defined function body applied.
-    
-	AopUtil.before(functionName, callback, [stratage]);
-    
-<b style="color:red">functionName</b> : {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
 
-<b style="color:red">callback</b> : {Function(arguments)} funciton that receives the original params as input.
+```js
+// usage
+AopUtil.before(functionName, callback, [stratage]);
 
-<b style="color:red">stratage</b> : {int} values below:
-
-  0 - (00 in Binary) No in, No out (Default);
-  
-  1 - (01 in Binary) Allow in, No out;
-  
-  2 - (10 in Binary) No in, Allow out;
-  
-  3 - (11 in Binary) Allow in, Allow out.
+// params
+functionName : 
+    {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
+callback : 
+    {Function(arguments)} funciton that receives the original params as input.
+stratage : 
+    {int} values below
+    0 - (00 in Binary) No in, No out (Default);
+    1 - (01 in Binary) Allow in, No out;
+    2 - (10 in Binary) No in, Allow out;
+    3 - (11 in Binary) Allow in, Allow out.
+```
 
 #### AopUtil.after
 Add a after aspect that would be executed after the original defined function body applied.
@@ -58,9 +59,12 @@ Add a after aspect that would be executed after the original defined function bo
 AopUtil.after(functionName, callback, [stratage]);
 
 // params
-functionName : {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
-callback : {Function(arguments)} funciton that receives the proper params as input. Arguments received depends on current stratage.
-stratage : {int} values below:
+functionName : 
+    {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
+callback : 
+    {Function(arguments)} funciton that receives the proper params as input. Arguments received depends on current stratage.
+stratage : 
+    {int} values below:
     0 - (00 in Binary) No in, No out (Default);
     1 - (01 in Binary) Allow in, No out;
     2 - (10 in Binary) No in, Allow out;
@@ -70,5 +74,10 @@ stratage : {int} values below:
 #### AopUtil.clearAdvice
 Clear all binded advices.
 
-    AopUtil.clearAdvice(functionName);
-    functionName : {String} public name of the function that is hacked. It should be able to be reached from the putlic namespace.
+```js
+// usage
+AopUtil.clearAdvice(functionName);
+
+// params
+functionName : 
+    {String} public name of the function that is hacked. It should be able to be reached from the putlic namespace.

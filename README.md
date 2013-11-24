@@ -4,6 +4,8 @@ Aop-in-js
 ### Descriptions
 An tool that applies aspect orinted programming in javascript.
 
+Check index.html for a demo.
+
 For each aspect that added, a <b>Stratage</b> could be choosen, while it's currently 2 digit in Binary:
 
     <First Byte> 

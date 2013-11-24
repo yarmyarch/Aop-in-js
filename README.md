@@ -13,25 +13,25 @@ For each aspect that added, a <b>Stratage</b> could be choosen, while it's curre
         0 - No out (Default Value);
         1 - Allow out;
 
-###### No In
+#### No In
 
 This aspect will only accept the original input (when the function is called) as parameter.
 
-###### Allow In
+#### Allow In
 
 This aspect will accept the latest returned value (from the aspect before it) as parameter.
 
-###### No Out
+#### No Out
 
 The returned value of the current aspect would be ignored.
 
-###### Allow Out
+#### Allow Out
 
 This aspect will return it's returned value for next usage (input to the next aspect or the final returned value if the current aspect is the last one).
 
 ### Public functions
 
-###### AopUtil.before
+#### AopUtil.before
 Add a before aspect that would be executed before the original defined function body applied.
     
 	AopUtil.before(functionName, callback, [stratage]);
@@ -50,7 +50,7 @@ Add a before aspect that would be executed before the original defined function 
   
   3 - (11 in Binary) Allow in, Allow out.
 
-###### AopUtil.after
+#### AopUtil.after
 Add a after aspect that would be executed after the original defined function body applied.
     
 	AopUtil.after(functionName, callback, [stratage]);
@@ -62,7 +62,7 @@ Add a after aspect that would be executed after the original defined function bo
         2 - (10 in Binary) No in, Allow out;
         3 - (11 in Binary) Allow in, Allow out.
 
-###### AopUtil.clearAdvice
+#### AopUtil.clearAdvice
 Clear all binded advices.
 
     AopUtil.clearAdvice(functionName);

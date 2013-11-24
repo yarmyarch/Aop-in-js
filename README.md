@@ -45,8 +45,8 @@ functionName :
 callback : 
     {Function(arguments)} funciton that receives the proper params as input. 
     Arguments received depends on current stratage.
-stratage : 
-    {int} values below
+[stratage] : 
+    {int} optional. Values below
     0 - (00 in Binary) No in, No out (Default);
     1 - (01 in Binary) Allow in, No out;
     2 - (10 in Binary) No in, Allow out;
@@ -67,8 +67,8 @@ functionName :
 callback : 
     {Function(arguments)} funciton that receives the proper params as input. 
     Arguments received depends on current stratage.
-stratage : 
-    {int} values below:
+[stratage] : 
+    {int} optional. Values below:
     0 - (00 in Binary) No in, No out (Default);
     1 - (01 in Binary) Allow in, No out;
     2 - (10 in Binary) No in, Allow out;

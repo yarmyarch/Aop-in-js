@@ -53,14 +53,19 @@ Add a before aspect that would be executed before the original defined function 
 #### AopUtil.after
 Add a after aspect that would be executed after the original defined function body applied.
     
-	AopUtil.after(functionName, callback, [stratage]);
-    functionName : {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
-    callback : {Function(arguments)} funciton that receives the proper params as input. Arguments received depends on current stratage.
-    stratage : {int} values below:
-        0 - (00 in Binary) No in, No out (Default);
-        1 - (01 in Binary) Allow in, No out;
-        2 - (10 in Binary) No in, Allow out;
-        3 - (11 in Binary) Allow in, Allow out.
+```js
+// usage
+AopUtil.after(functionName, callback, [stratage]);
+
+// params
+functionName : {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
+callback : {Function(arguments)} funciton that receives the proper params as input. Arguments received depends on current stratage.
+stratage : {int} values below:
+    0 - (00 in Binary) No in, No out (Default);
+    1 - (01 in Binary) Allow in, No out;
+    2 - (10 in Binary) No in, Allow out;
+    3 - (11 in Binary) Allow in, Allow out.
+```
 
 #### AopUtil.clearAdvice
 Clear all binded advices.

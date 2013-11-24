@@ -38,7 +38,7 @@ Add a before aspect that would be executed before the original defined function 
 
 ```js
 // usage
-AopUtil.before(functionName, callback, [stratage]);
+AopUtil.before(functionName, callback[, stratage]);
 
 // params
 functionName : 
@@ -60,7 +60,7 @@ Add a after aspect that would be executed after the original defined function bo
     
 ```js
 // usage
-AopUtil.after(functionName, callback, [stratage]);
+AopUtil.after(functionName, callback[, stratage]);
 
 // params
 functionName : 

@@ -40,9 +40,11 @@ AopUtil.before(functionName, callback, [stratage]);
 
 // params
 functionName : 
-    {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
+    {String} public name of the function that would be hacked. 
+    It should be able to be reached from the putlic namespace.
 callback : 
-    {Function(arguments)} funciton that receives the original params as input.
+    {Function(arguments)} funciton that receives the proper params as input. 
+    Arguments received depends on current stratage.
 stratage : 
     {int} values below
     0 - (00 in Binary) No in, No out (Default);
@@ -60,9 +62,11 @@ AopUtil.after(functionName, callback, [stratage]);
 
 // params
 functionName : 
-    {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
+    {String} public name of the function that would be hacked. 
+    It should be able to be reached from the putlic namespace.
 callback : 
-    {Function(arguments)} funciton that receives the proper params as input. Arguments received depends on current stratage.
+    {Function(arguments)} funciton that receives the proper params as input. 
+    Arguments received depends on current stratage.
 stratage : 
     {int} values below:
     0 - (00 in Binary) No in, No out (Default);
@@ -80,4 +84,5 @@ AopUtil.clearAdvice(functionName);
 
 // params
 functionName : 
-    {String} public name of the function that is hacked. It should be able to be reached from the putlic namespace.
+    {String} public name of the function that is hacked. 
+    It should be able to be reached from the putlic namespace.

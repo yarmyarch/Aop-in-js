@@ -35,13 +35,14 @@ This aspect will return it's returned value for next usage (input to the next as
 Add a before aspect that would be executed before the original defined function body applied.
     
 	AopUtil.before(functionName, callback, [stratage]);
-    functionName : {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
-    callback</b> : {Function(arguments)} funciton that receives the original params as input.
-    stratage : {int} values below:
-        0 - (00 in Binary) No in, No out (Default);
-        1 - (01 in Binary) Allow in, No out;
-        2 - (10 in Binary) No in, Allow out;
-        3 - (11 in Binary) Allow in, Allow out.
+    
+<b style="color:red">functionName</b> : {String} public name of the function that would be hacked. It should be able to be reached from the putlic namespace.
+<b style="color:red">callback</b> : {Function(arguments)} funciton that receives the original params as input.
+<b style="color:red">stratage</b> : {int} values below:
+  0 - (00 in Binary) No in, No out (Default);
+  1 - (01 in Binary) Allow in, No out;
+  2 - (10 in Binary) No in, Allow out;
+  3 - (11 in Binary) Allow in, Allow out.
 
 ###### AopUtil.after
 Add a after aspect that would be executed after the original defined function body applied.

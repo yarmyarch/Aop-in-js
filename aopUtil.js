@@ -24,13 +24,15 @@ var createProxyMethod = function(originalItem) {
 		//isInAllowed为策略值二进制表示中的最低位值，isOutAllowed为次低位，isQuit为第三位
 		var isInAllowed, isOutAllowed, isQuit;
 		
-		//当前函数的返回值
-		var result;
+		var advice, method, fromOriginal = 0;
 		
 		for (var i in originalItem.adviceChain) {
 			
+            advice = originalItem.adviceChain[i];
+            method = advice.method;
+            
 			//读取策略组
-			isInAllowed = originalItem.adviceChain[i].strategy;				
+			isInAllowed = advice.strategy;				
 			isOutAllowed = isInAllowed >> 1;
 			
 			isInAllowed = isInAllowed - (isInAllowed >> 1 << 1);
@@ -38,8 +40,18 @@ var createProxyMethod = function(originalItem) {
 			
 			if (isInAllowed) currentArg = lastReturn;
 			else currentArg = arguments;
-			
-			currentReturn = originalItem.adviceChain[i].method.apply(this, currentArg);
+            
+            if (fromOriginal) {
+                currentArg = [currentArg];
+                fromOriginal = 0;
+            }
+            
+			currentReturn = method.apply(this, currentArg);
+            
+            // if it's returned from the original function, give it a wrap to prevent error.
+            if (method == originalItem.backup) {
+                fromOriginal = 1;
+            }
 			
 			//Action处理
 			if (currentReturn == AopUtil.ACTION_QUIT) break;

@@ -13,6 +13,8 @@ For each aspect that added, a <b>Stratage</b> could be choosen, while it's curre
         0 - No out (Default Value);
         1 - Allow out;
 
+Note that the original functions is always set with "Allow in" and "Allow out", while advices are set "No in", "No out" defaultly.
+
 #### No In
 
 This aspect will only accept the original input (when the function is called) as parameter.
@@ -70,7 +72,8 @@ callback :
 [stratage] : 
     {int} optional. Values below:
     0 - (00 in Binary) No in, No out (Default);
-    1 - (01 in Binary) Allow in, No out;
+    1 - (01 in Binary) Allow in, No out. 
+        Note that the first advice that is behind the orginal function which allows input always received 1 param;
     2 - (10 in Binary) No in, Allow out;
     3 - (11 in Binary) Allow in, Allow out.
 ```

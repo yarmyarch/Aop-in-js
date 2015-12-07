@@ -1,17 +1,18 @@
 Aop-in-js
 =========
-
+### Install
+    npm install js_aop
 ### Descriptions
-An tool that applies aspect orinted programming in javascript.
+An tool that applies Aspect Orinted Programming in javascript, can be used creating mocks easily.
 
 Check index.html for a demo.
 
 For each aspect that added, a <b>Stratage</b> could be choosen, while it's currently 2 digit in Binary:
 
-    <First Byte> 
+    <First Bit> 
         0 - No in (Default Value);
         1 - Allow in;
-    <Second Byte> 
+    <Second Bit> 
         0 - No out (Default Value);
         1 - Allow out;
 
@@ -33,61 +34,70 @@ The returned value of the current aspect would be ignored.
 
 This aspect will return it's returned value for next usage (input to the next aspect or the final returned value if the current aspect is the last one).
 
-### Public functions
+### Usage
 
-#### AopUtil.before
-Add a before aspect that would be executed before the original defined function body applied.
 
 ```js
-// usage
-AopUtil.before(functionName, callback[, stratage]);
+/**
+ * Adds a 'before' aspect that would be executed before the original defined function body applied.
+ *
+ * @param {Object} obj - Object that would be mocked.
+ * @param {String} funcName - The name of the mocked function.
+ * @param {Function} callback - Function that receives the proper params as input, while the arguments received depends on strategy used.
+ * @param {int} [strategy] - Optional. Strategy that could be 1 of the 5 types:
+ *     0 - (00 in Binary) No in, No out (Default);
+ *     1 - (01 in Binary) Allow in, No out;
+ *     2 - (10 in Binary) No in, Allow out;
+ *     3 - (11 in Binary) Allow in, Allow out.
+ */
+AopUtil.before(obj, funcName, callback[, strategy]);
 
-// params
-functionName : 
-    {String} public name of the function that would be hacked. 
-    It should be able to be reached from the putlic namespace.
-callback : 
-    {Function(arguments)} funciton that receives the proper params as input. 
-    Arguments received depends on current stratage.
-[stratage] : 
-    {int} optional. Values below
-    0 - (00 in Binary) No in, No out (Default);
-    1 - (01 in Binary) Allow in, No out;
-    2 - (10 in Binary) No in, Allow out;
-    3 - (11 in Binary) Allow in, Allow out.
+/**
+ * Add an 'after' aspect that would be executed after the original defined function body applied.
+ *
+ * @param {Object} obj - Object that would be mocked.
+ * @param {String} funcName - The name of the mocked function.
+ * @param {Function} callback - Function that receives the proper params as input, while the arguments received depends on strategy used.
+ * @param {int} [strategy] - Optional. Strategy that could be 1 of the 5 types:
+ *     0 - (00 in Binary) No in, No out (Default);
+ *     1 - (01 in Binary) Allow in, No out;
+ *     2 - (10 in Binary) No in, Allow out;
+ *     3 - (11 in Binary) Allow in, Allow out.
+ */
+AopUtil.after(obj, funcName, callback[, strategy]);
+
+/**
+ * Clear all advices bind to target function.
+ *
+ * @param {Object} obj - Object that was mocked.
+ * @param {String} funcName - The name of the mocked function.
+ */
+AopUtil.clearAdvice(obj, funcName);
 ```
 
-#### AopUtil.after
-Add a after aspect that would be executed after the original defined function body applied.
-    
-```js
-// usage
-AopUtil.after(functionName, callback[, stratage]);
-
-// params
-functionName : 
-    {String} public name of the function that would be hacked. 
-    It should be able to be reached from the putlic namespace.
-callback : 
-    {Function(arguments)} funciton that receives the proper params as input. 
-    Arguments received depends on current stratage.
-[stratage] : 
-    {int} optional. Values below:
-    0 - (00 in Binary) No in, No out (Default);
-    1 - (01 in Binary) Allow in, No out. 
-        Note that the first advice that is behind the orginal function which allows input always received 1 param;
-    2 - (10 in Binary) No in, Allow out;
-    3 - (11 in Binary) Allow in, Allow out.
+### Demo
 ```
+var AopUtil = require('js_aop');
 
-#### AopUtil.clearAdvice
-Clear all binded advices.
+var obj = {};
+obj.demo = function(a, b) {
+    return a - b;
+}
 
-```js
-// usage
-AopUtil.clearAdvice(functionName);
+AopUtil.before(obj, 'demo', function(a, b) {
+    console.log(0);
+    // [a * 2, b] would be injected as agrument list to the next advice (or the original function)
+    return [a * 2, b];
+}, 2);
 
-// params
-functionName : 
-    {String} public name of the function that is hacked. 
-    It should be able to be reached from the putlic namespace.
+AopUtil.after(obj, 'demo', function(result) {
+    // receives 1 param only from the original function.
+    console.log(1);
+    return result * 2;
+}, 1);
+
+obj.demo(1,1);
+// 0
+// 1
+// return (1 * 2 - 1) * 2
+```

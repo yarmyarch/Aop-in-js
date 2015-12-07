@@ -7,7 +7,7 @@ An tool that applies Aspect Orinted Programming in javascript, can be used creat
 
 Check index.html for a demo.
 
-For each aspect that added, a <b>Stratage</b> could be choosen, while it's currently 2 digit in Binary:
+For each aspect that added, a <b>Strategy</b> could be choosen, while it's currently 2 digit in Binary:
 
     <First Bit> 
         0 - No in (Default Value);

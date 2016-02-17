@@ -73,6 +73,28 @@ AopUtil.after(obj, funcName, callback[, strategy]);
  * @param {String} funcName - The name of the mocked function.
  */
 AopUtil.clearAdvice(obj, funcName);
+
+/**
+ * Applies an set of 'Advices' to the target object. It applies functions defined in 'aspect' to the target object
+ * using specific rules. If a function defined in target exists in 'aspect', the aspect would be used before (or
+ * after regarding to the rules given) the target function. If it not exist, the aspect would be applied directly
+ * as a function of the target.
+ *
+ * @param {Object} target - Target to which those advices would be applied.
+ * @param {Object<String, Function>} aspect - An object containing set of functions that would be used as advices.
+ * @param {[String]|[Object<String, String>]} rule - Optinal. Rules to be used. Can be 'before', 'after' or anything
+ *   else that's supported. If given as an Object, it should define rules specifically for each aspect. Using
+ *   'before' for default, meaning the aspect would be executed before the target function.
+ *
+ * @return {Object} - The updated target.
+ */
+AopUtil.applyAspect(target, aspect[, rule]);
+
+/**
+ * Remove all advices bind to a target.
+ * @param {Object} target - Target that's bind with aspects.
+ */
+AopUtil.clearAspect(target);
 ```
 
 ### Demo

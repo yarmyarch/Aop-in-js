@@ -1,6 +1,12 @@
+'use strict';
+
 var AopUtil = (function() {
 
   var self;
+  
+  var LC = {
+    DEFAULT_RULE: 'before'
+  };
     
   var aspects = {};
   
@@ -26,9 +32,7 @@ var AopUtil = (function() {
       var currentArg = arguments;
       var currentReturn = arguments;
       var lastReturn = arguments;
-      
-      //计算组合策略（参数+返回值策略）中的参数策略
-      //isInAllowed为策略值二进制表示中的最低位值，isOutAllowed为次低位，isQuit为第三位
+
       var isInAllowed, isOutAllowed;
       
       var advice, method, fromOriginal = 0;
@@ -38,7 +42,8 @@ var AopUtil = (function() {
         advice = originalItem.adviceChain[i];
         method = advice.method;
         
-        //读取策略组
+        // Reading the strategy code in to binary.
+        // TODO:Yujia - well actually the ugly 'ACTION_QUIT' can simply be a new strategy.
         isInAllowed = advice.strategy;        
         isOutAllowed = isInAllowed >> 1;
         
@@ -62,7 +67,7 @@ var AopUtil = (function() {
           fromOriginal = 1;
         }
         
-        //Action处理
+        // Taking care of actions. We currently have only 1 action available.
         if (currentReturn == self.ACTION_QUIT) {
           break;
         }
@@ -81,7 +86,7 @@ var AopUtil = (function() {
       return;
     }
     
-    //初始化adviceChain
+    // Initializing the advice chain.
     var aspect = {};
     aspect.obj = obj;
     aspect.beforeCount = 0;
@@ -98,9 +103,22 @@ var AopUtil = (function() {
   return self = {
     ALLOW_IN: 1,
     ALLOW_OUT: 2,
-    //QuitAction处理 当接收到一个return为Action_quit时，强制中断后续所有的Aspect
+    // QuitAction: whenever the advice chain returned this label, ends the chain immediately and ignores all remaining
+    // functions. The whole chain returns the last legal returned value.
     ACTION_QUIT: "Aop_" + Math.floor(Math.random()*1000000).toString(36),
     
+    /**
+     * Adds a 'before' aspect that would be executed before the original defined function body applied.
+     *
+     * @param {Object} obj - Object that would be mocked.
+     * @param {String} funcName - The name of the mocked function.
+     * @param {Function} callback - Function that receives the proper params as input, while the arguments received depends on strategy used.
+     * @param {int} [strategy] - Optional. Strategy that could be 1 of the 5 types:
+     *     0 - (00 in Binary) No in, No out (Default);
+     *     1 - (01 in Binary) Allow in, No out;
+     *     2 - (10 in Binary) No in, Allow out;
+     *     3 - (11 in Binary) Allow in, Allow out.
+     */
     before: function(obj, methodName, command, strategy) {
       
       aspects[methodName] = aspects[methodName] || [];
@@ -113,29 +131,46 @@ var AopUtil = (function() {
       aspect.adviceChain.splice(
         aspect.beforeCount, 0, {
         method : command,
-        //默认以原始参数输入，不允许输出
+        // Default strategy: using original parameters, returned value won't be parsed into the next advice.
         strategy : (strategy ? strategy : 0)
       });
       ++aspect.beforeCount;
     },
 
+    /**
+     * Add an 'after' aspect that would be executed after the original defined function body applied.
+     *
+     * @param {Object} obj - Object that would be mocked.
+     * @param {String} funcName - The name of the mocked function.
+     * @param {Function} callback - Function that receives the proper params as input, while the arguments received depends on strategy used.
+     * @param {int} [strategy] - Optional. Strategy that could be 1 of the 5 types:
+     *     0 - (00 in Binary) No in, No out (Default);
+     *     1 - (01 in Binary) Allow in, No out;
+     *     2 - (10 in Binary) No in, Allow out;
+     *     3 - (11 in Binary) Allow in, Allow out.
+     */
     after: function(obj, methodName, command, strategy) {
       
       aspects[methodName] = aspects[methodName] || [];
       var objIndex = getAspectIndex(obj, methodName),
           aspect = aspects[methodName][objIndex];
       
-      //原始函数两端全开
+      // The original function always receives the last return as input, and always push its returned value as a legal output.
       if (objIndex == -1) {
         aspect = attachToAop(obj, methodName, 3);
       }
       aspect.adviceChain.push({
         method : command,
-        //默认以原始参数输入，不允许输出
         strategy : (strategy ? strategy : 0)
       });
     },
 
+    /**
+     * Clear all advices bind to target function.
+     *
+     * @param {Object} obj - Object that was mocked.
+     * @param {String} funcName - The name of the mocked function.
+     */
     clearAdvice: function(obj, methodName) {
       
       var objIndex = getAspectIndex(obj, methodName),
@@ -145,7 +180,58 @@ var AopUtil = (function() {
         obj[methodName] = aspect.backup;
         aspects[methodName].splice(objIndex, 1);
       }
+    },
+    
+    /**
+     * Applies an set of 'Advices' to the target object. It applies functions defined in 'aspect' to the target object
+     * using specific rules. If a function defined in target exists in 'aspect', the aspect would be used before (or
+     * after regarding to the rules given) the target function. If it not exist, the aspect would be applied directly
+     * as a function of the target.
+     *
+     * @param {Object} target - Target to which those advices would be applied.
+     * @param {Object<String, Function>} aspect - An object containing set of functions that would be used as advices.
+     * @param {[String]|[Object<String, String>]} rule - Optinal. Rules to be used. Can be 'before', 'after' or anything
+     *   else that's supported. If given as an Object, it should define rules specifically for each aspect. Using
+     *   'before' for default, meaning the aspect would be executed before the target function.
+     *
+     * @return {Object} - The updated target.
+     */
+    applyAspect: function(target, aspect, rule) {
+      Object.keys(aspect).forEach(function(funcName) {
+        // Do nothing to attributes that's not a function.
+        if (!aspect[funcName] instanceof Function) {
+          return;
+        }
+
+        var realRule = rule instanceof Object && rule[funcName] || rule;
+        realRule = MockUtil[realRule] && realRule || LC.DEFAULT_RULE;
+
+        if (target.hasOwnProperty(funcName)) {
+          if (!target[funcName] instanceof Function) {
+            return;
+          }
+          self[realRule](target, funcName, aspect[funcName]);
+        } else {
+          target[funcName] = aspect[funcName];
+        }
+      });
+      return target;
+    },
+
+    /**
+     * Remove all advices bind to a target.
+     * @param {Object} target - Target that's bind with aspects.
+     */
+    clearAspect: function(target) {
+      Object.keys(target).forEach(function(funcName) {
+        if (!target[funcName] instanceof Function) {
+          return;
+        }
+        self.clearAdvice(target, funcName);
+      });
     }
   };
 
 })();
+
+module && module.exports = AopUtil;

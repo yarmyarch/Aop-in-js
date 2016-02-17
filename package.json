@@ -1,0 +1,25 @@
+{
+  "name": "js_aop",
+  "version": "1.0.1",
+  "description": "Aspecte Orinted Programming using javascript",
+  "main": "AopUtil.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yarmyarch/Aop-in-js.git"
+  },
+  "keywords": [
+    "aop",
+    "mock",
+    "javascript",
+    "aspected"
+  ],
+  "author": "yarmyarch@live.cn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yarmyarch/Aop-in-js/issues"
+  },
+  "homepage": "https://github.com/yarmyarch/Aop-in-js#readme"
+}

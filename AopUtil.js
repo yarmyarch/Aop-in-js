@@ -233,5 +233,3 @@ var AopUtil = (function() {
   };
 
 })();
-
-module && (module.exports = AopUtil);

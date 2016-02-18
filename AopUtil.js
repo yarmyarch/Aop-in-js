@@ -179,16 +179,21 @@ var AopUtil = (function() {
         }
 
         var realRule = rule instanceof Object ? rule[funcName] : rule;
-        realRule = AopUtil[realRule] && realRule || LC.DEFAULT_RULE;
+        realRule = self[realRule] && realRule || LC.DEFAULT_RULE;
 
         // Default strategy for advices is no in, no out, and do nothing.
         var realStrategy = (strategy instanceof Object ? strategy[funcName] : strategy) || 0;
         
         // Give it an empty function so it can be removed when clearing.
-        !target.hasOwnProperty(funcName) && (target[funcName] = emptyFunc);
+        if (!target.hasOwnProperty(funcName)) {
+          target[funcName] = emptyFunc;
+          realRule = LC.DEFAULT_RULE;
+          realStrategy = self.ALLOW_IN + self.ALLOW_OUT + self.FORCE_QUIT;
+        }
         if (!target[funcName] instanceof Function) {
           return;
         }
+
         self[realRule](target, funcName, aspect[funcName], realStrategy);
       });
       return target;

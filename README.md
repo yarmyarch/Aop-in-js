@@ -5,7 +5,7 @@ Aop-in-js
 ### Descriptions
 An tool that applies Aspect Orinted Programming in javascript, can be used creating mocks easily.
 
-For each aspect that added, a <b>Strategy</b> could be choosen, while it's digits in Binary:
+For each advice that added, a <b>Strategy</b> could be choosen, while it's digits in Binary:
 
     <AopUtil.ALLOW_IN, 0000000X>
         0 - No in (Default Value);
@@ -33,11 +33,11 @@ AopUtil.before(obj, funcName, advice,
 
 #### No In
 
-This aspect will only accept the original input (when the function is called) as parameter.
+This advice will only accept the original input (when the function is called) as parameter.
 
 #### Allow In
 
-This aspect will accept the latest returned value (from the aspect before it) as parameter.
+This advice will accept the latest returned value (from the advice before it) as parameter.
 
 #### No Out
 
@@ -92,16 +92,16 @@ AopUtil.after(obj, funcName, advice[, strategy]);
 AopUtil.clearAdvice(obj, funcName);
 
 /**
- * Applies an set of 'Advices' to the target object. It applies functions defined in 'aspect' to the target object
- * using specific rules. If a function defined in target exists in 'aspect', the aspect would be used before (or
- * after regarding to the rules given) the target function. If it not exist, the aspect would be applied directly
+ * Applies an set of 'advice' to the target object. It applies functions defined in 'aspect' to the target object
+ * using specific rules. If a function defined in target exists in 'aspect', the advice would be used before (or
+ * after regarding to the rules given) the target function. If it not exist, the advice would be applied directly
  * as a function of the target.
  *
  * @param {Object} target - Target to which those advices would be applied.
  * @param {Object<String, Function>} aspect - An object containing set of functions that would be used as advices.
  * @param {String|Object<String, String>} [rule] - Optinal. Rules to be used. Can be 'before', 'after' or anything
  *   else that's supported. If given as an Object, it should define rules specifically for each advice. Using
- *   'before' for default, meaning the aspect would be executed before the target function.
+ *   'before' for default, meaning the advice would be executed before the target function.
  * @param {Integer|Object<String, Integer>} [strategy] - Optinal. Strategies to be used. Can be anything supported.
  *   If an Object given, it should define strategies specifically for each advice. Using 0 for default.
  *

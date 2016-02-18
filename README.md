@@ -140,7 +140,6 @@ AopUtil.after(obj, 'demo', function(result) {
     return result * 2;
 }, AopUtil.ALLOW_IN + AopUtil.ALLOW_OUT);
 ```
-
 #### Aspects
 ```js
 var beforeAspect = {
@@ -163,16 +162,15 @@ var afterAspect = {
   }
 }
 AopUtil.applyAspect(obj, afterAspect, 'after');
-
+```
+#### Aspects with rules and strategies
+```js
 var afterAspect2 = {
   demo: function(value) {
     console.log('after advice with strategy ALLOW_IN applied: ' + value);
     return value;
   }
 }
-```
-#### Aspects with rules and strategies
-```js
 AopUtil.applyAspect(obj, afterAspect2, {
   demo: 'after'
 }, {

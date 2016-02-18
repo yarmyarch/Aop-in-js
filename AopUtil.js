@@ -204,7 +204,7 @@ var AopUtil = (function() {
         }
 
         var realRule = rule instanceof Object && rule[funcName] || rule;
-        realRule = MockUtil[realRule] && realRule || LC.DEFAULT_RULE;
+        realRule = AopUtil[realRule] && realRule || LC.DEFAULT_RULE;
 
         if (target.hasOwnProperty(funcName)) {
           if (!target[funcName] instanceof Function) {

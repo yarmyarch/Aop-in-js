@@ -5,19 +5,31 @@ Aop-in-js
 ### Descriptions
 An tool that applies Aspect Orinted Programming in javascript, can be used creating mocks easily.
 
-For each aspect that added, a <b>Strategy</b> could be choosen, while it's currently 3 digit in Binary:
+For each aspect that added, a <b>Strategy</b> could be choosen, while it's digits in Binary:
 
-    <First Bit, 0000000X>
+    <AopUtil.ALLOW_IN, 0000000X>
         0 - No in (Default Value);
         1 - Allow in;
-    <Second Bit, 000000X0>
+    <AopUtil.ALLOW_OUT, 000000X0>
         0 - No out (Default Value);
         1 - Allow out;
-    <Thrid Bit, 00000X00>
-        0 - Do nothing;
+    <AopUtil.RETURN_AS_ARGUMENTS, 00000X00>
+        0 - Returned value be used as the first parameter;
+        1 - Returned value be used as arguments;
+    <AopUtil.FORCE_QUIT, 0000X000>
+        0 - Do nothing.
         1 - Force quit;
 
-Note that the original functions is always set with "Allow in" and "Allow out", while advices are set "No in", "No out" by default.
+Note that the original functions is always set with strategy 3, meaning "Allow in" and "Allow out", while advices are set with 0 to all bits by default.
+```js
+// Applying a strategy:
+AopUtil.before(obj, funcName, advice,
+  AopUtil.ALLOW_IN +
+  AopUtil.ALLOW_OUT +
+  AopUtil.RETURN_AS_ARGUMENTS +
+  AopUtil.FORCE_QUIT // + ...
+);
+```
 
 #### No In
 
@@ -31,9 +43,13 @@ This aspect will accept the latest returned value (from the aspect before it) as
 
 The returned value of the current advice would be ignored.
 
-#### Allow Out
+#### Returned as parameter
 
-This advice will return it's returned value for next usage (input to the next aspect or the final returned value if the current aspect is the last one).
+Only useful when ALLOW_OUT set true. The returned value of this advice would be wrapped as an element of an array, so the next advice only receives 1 parameter.
+
+#### Returned as arguments
+
+Only useful when ALLOW_OUT set true. The returned value of this advice would be used as 'arguments' directly by the next advice.
 
 #### Force quit
 
@@ -49,11 +65,11 @@ The advice chain ends here and returns, all other mocks after this advice would 
  *
  * @param {Object} obj - Object that would be mocked.
  * @param {String} funcName - The name of the mocked function.
- * @param {Function} callback - Function that receives the proper params as input, while the arguments received
+ * @param {Function} advice - Function that receives the proper params as input, while the arguments received
  *   depends on strategy used.
  * @param {int} [strategy] - Optional, the strategy code.
  */
-AopUtil.before(obj, funcName, callback[, strategy]);
+AopUtil.before(obj, funcName, advice[, strategy]);
 
 /**
  * Add an 'after' advice that would be executed after the original defined function body applied. Note that when
@@ -61,11 +77,11 @@ AopUtil.before(obj, funcName, callback[, strategy]);
  *
  * @param {Object} obj - Object that would be mocked.
  * @param {String} funcName - The name of the mocked function.
- * @param {Function} callback - Function that receives the proper params as input, while the arguments received
+ * @param {Function} advice - Function that receives the proper params as input, while the arguments received
  *   depends on strategy used.
  * @param {int} [strategy] - Optional, the strategy code.
  */
-AopUtil.after(obj, funcName, callback[, strategy]);
+AopUtil.after(obj, funcName, advice[, strategy]);
 
 /**
  * Clear all advices bind to target function.
@@ -91,7 +107,7 @@ AopUtil.clearAdvice(obj, funcName);
  *
  * @return {Object} - The updated target.
  */
-AopUtil.applyAspect(target, aspect[, rule]);
+AopUtil.applyAspect(target, aspect[, rule[, strategy]]);
 
 /**
  * Remove all advices bind to a target.
@@ -102,28 +118,82 @@ AopUtil.clearAspect(target);
 ```
 
 ### Demo
+#### Basic Before and After
 ```
 var AopUtil = require('js_aop');
 
 var obj = {};
 obj.demo = function(a, b) {
-    return a - b;
+  console.log('demo')
+  return a - b;
 }
 
 AopUtil.before(obj, 'demo', function(a, b) {
-    console.log(0);
+    console.log('before demo');
     // [a * 2, b] would be injected as agrument list to the next advice (or the original function)
     return [a * 2, b];
-}, 2);
+}, AopUtil.ALLOW_OUT + AopUtil.RETURN_AS_ARGUMENTS);
 
 AopUtil.after(obj, 'demo', function(result) {
     // receives 1 param only from the original function.
-    console.log(1);
+    console.log('after demo');
     return result * 2;
-}, 1);
+}, AopUtil.ALLOW_IN + AopUtil.ALLOW_OUT);
+```
 
+#### Aspects
+```js
+var beforeAspect = {
+  value: 'Nothing to do with this guy',
+  demo: function(value) {
+    console.log('before advice applied');
+    return value;
+  },
+  test: function(value) {
+    console.log('advice added: ' + value);
+    return value;
+  }
+}
+AopUtil.applyAspect(obj, beforeAspect);
+
+var afterAspect = {
+  demo: function(value) {
+    console.log('after advice applied');
+    return value;
+  }
+}
+AopUtil.applyAspect(obj, afterAspect, 'after');
+
+var afterAspect2 = {
+  demo: function(value) {
+    console.log('after advice with strategy ALLOW_IN applied: ' + value);
+    return value;
+  }
+}
+```
+#### Aspects with rules and strategies
+```js
+AopUtil.applyAspect(obj, afterAspect2, {
+  demo: 'after'
+}, {
+  demo: AopUtil.ALLOW_IN
+});
+```
+#### All together
+```js
 obj.demo(1,1);
-// 0
-// 1
-// return (1 * 2 - 1) * 2
+// before aspect applied
+// before demo
+// demo
+// after demo
+// after aspect applied
+// after aspect with strategy ALLOW_IN applied: 2
+// Final result of demo: (1 * 2 - 1) * 2
+
+obj.test(1);
+// advice added: 1
+
+AopUtil.clearAspect(obj);
+console.log(obj.demo(1,1)); // 0
+console.log(obj.test); // undefined
 ```

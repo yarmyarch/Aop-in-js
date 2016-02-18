@@ -9,10 +9,13 @@ var AopUtil = (function() {
     STRATEGY_GROUP: {
       ALLOW_IN: 0,
       ALLOW_OUT: 1,
-      FORCE_QUIT: 3
+      // Sets if the returned array could be used as arguments directly.
+      RETURN_AS_ARGUMENTS: 2,
+      FORCE_QUIT: 3,
     }
   };
-    
+  
+  var emptyFunc = function() {};
   var aspects = {};
 
   /**
@@ -36,7 +39,7 @@ var AopUtil = (function() {
     var newStrategy;
     strategy += 0;
     while(strategy) {
-      strategyArr.push(strategy - (newStrategy = strategy >> 1) << 1);
+      strategyArr.push(strategy - ((newStrategy = strategy >> 1) << 1));
       strategy = newStrategy;
     }
     return strategyArr;
@@ -57,18 +60,20 @@ var AopUtil = (function() {
     return function() {
       var randCode = '_ri' + parseInt((Math.random() + '').substr(2)).toString(36);
       var lastReturn = randCode;
+      var lastReturnedAsArguments = false;
       
       for (var i = 0, advice; advice = originalItem.adviceChain[i]; ++i) {
         var method = advice.method;
         var strategyArr = getStrategyArray(advice.strategy);
-        var allowIn = strategyArr[LC.STRATEGY_GROUP.ALLOW_IN];
-        var allowOut = strategyArr[LC.STRATEGY_GROUP.ALLOW_OUT];
-        var forceQuit = strategyArr[LC.STRATEGY_GROUP.FORCE_QUIT];
 
-        var currentReturn = method.apply(this, allowIn && (lastReturn != randCode) && [lastReturn] || arguments);
-        allowOut && (lastReturn = currentReturn);
+        var args = strategyArr[LC.STRATEGY_GROUP.ALLOW_IN] && (lastReturn != randCode) && 
+            (lastReturnedAsArguments ? lastReturn : [lastReturn]) || arguments;
+        var currentReturn = method.apply(this, args);
+        
+        lastReturnedAsArguments = strategyArr[LC.STRATEGY_GROUP.RETURN_AS_ARGUMENTS];
+        strategyArr[LC.STRATEGY_GROUP.ALLOW_OUT] && (lastReturn = currentReturn);
 
-        if (forceQuit) {
+        if (strategyArr[LC.STRATEGY_GROUP.FORCE_QUIT]) {
           break;
         }
       }
@@ -105,13 +110,13 @@ var AopUtil = (function() {
      *
      * @param {Object} obj - Object that would be mocked.
      * @param {String} funcName - The name of the mocked function.
-     * @param {Function} callback - Function that receives the proper params as input, while the arguments received
+     * @param {Function} advice - Function that receives the proper params as input, while the arguments received
      *   depends on strategy used.
      * @param {int} [strategy] - Optional, the strategy code.
      */
-    before: function(obj, methodName, command, strategy) {
+    before: function(obj, methodName, advice, strategy) {
       getAdviceChain(obj, methodName).unshift({
-        method : command,
+        method : advice,
         // Default strategy: using original parameters, returned value won't be parsed into the next advice.
         strategy : strategy || 0
       });
@@ -123,13 +128,13 @@ var AopUtil = (function() {
      *
      * @param {Object} obj - Object that would be mocked.
      * @param {String} funcName - The name of the mocked function.
-     * @param {Function} callback - Function that receives the proper params as input, while the arguments received
+     * @param {Function} advice - Function that receives the proper params as input, while the arguments received
      *   depends on strategy used.
      * @param {int} [strategy] - Optional, the strategy code.
      */
-    after: function(obj, methodName, command, strategy) {
+    after: function(obj, methodName, advice, strategy) {
       getAdviceChain(obj, methodName).push({
-        method : command,
+        method : advice,
         strategy : strategy || 0
       });
     },
@@ -178,15 +183,13 @@ var AopUtil = (function() {
 
         // Default strategy for advices is no in, no out, and do nothing.
         var realStrategy = (strategy instanceof Object ? strategy[funcName] : strategy) || 0;
-
-        if (target.hasOwnProperty(funcName)) {
-          if (!target[funcName] instanceof Function) {
-            return;
-          }
-          self[realRule](target, funcName, aspect[funcName]);
-        } else {
-          target[funcName] = aspect[funcName];
+        
+        // Give it an empty function so it can be removed when clearing.
+        !target.hasOwnProperty(funcName) && (target[funcName] = emptyFunc);
+        if (!target[funcName] instanceof Function) {
+          return;
         }
+        self[realRule](target, funcName, aspect[funcName], realStrategy);
       });
       return target;
     },
@@ -202,13 +205,16 @@ var AopUtil = (function() {
           return;
         }
         self.clearAdvice(target, funcName);
+        if (target[funcName] === emptyFunc) {
+          delete target[funcName];
+        }
       });
     }
   };
 
   // Adding constants to be used for strategy shortcuts.
   Object.keys(LC.STRATEGY_GROUP).forEach(function(key) {
-    self.key = 1 << LC.STRATEGY_GROUP[key];
+    self[key] = 1 << LC.STRATEGY_GROUP[key];
   });
 
   return self;

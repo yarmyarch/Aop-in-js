@@ -1,6 +1,6 @@
 {
   "name": "js_aop",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "Aspecte Orinted Programming using javascript",
   "main": "AopUtil.js",
   "scripts": {

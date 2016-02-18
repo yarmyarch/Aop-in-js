@@ -234,4 +234,4 @@ var AopUtil = (function() {
 
 })();
 
-module && module.exports = AopUtil;
+module && (module.exports = AopUtil);

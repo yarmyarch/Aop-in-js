@@ -15,7 +15,8 @@ var AopUtil = (function() {
     }
   };
   
-  var emptyFunc = function() {};
+  var randCode = '_ri' + parseInt((Math.random() + '').substr(2)).toString(36);
+  
   var aspects = {};
 
   /**
@@ -58,12 +59,12 @@ var AopUtil = (function() {
     
   var createProxyMethod = function(originalItem) {
     return function() {
-      var randCode = '_ri' + parseInt((Math.random() + '').substr(2)).toString(36);
       var lastReturn = randCode;
       var lastReturnedAsArguments = false;
       
       for (var i = 0, advice; advice = originalItem.adviceChain[i]; ++i) {
         var method = advice.method;
+        if (!(method instanceof Function)) continue;
         var strategyArr = getStrategyArray(advice.strategy);
 
         var args = strategyArr[LC.STRATEGY_GROUP.ALLOW_IN] && (lastReturn != randCode) && 
@@ -82,8 +83,12 @@ var AopUtil = (function() {
   };
     
   var attachToAop = function(obj, methodName, strategy) {
+    if (!obj.hasOwnProperty(methodName)) {
+      obj[methodName] = randCode;
+    }
     var sourceMethod = obj[methodName];
-    if (!sourceMethod) {
+    // We allow it's not defined. In this case we set it blank and add advices to be applied directly.
+    if (!(sourceMethod instanceof Function) && sourceMethod !== randCode) {
       return;
     }
     
@@ -174,7 +179,7 @@ var AopUtil = (function() {
     applyAspect: function(target, aspect, rule, strategy) {
       Object.keys(aspect).forEach(function(funcName) {
         // Do nothing to attributes that's not a function.
-        if (!aspect[funcName] instanceof Function) {
+        if (!(aspect[funcName] instanceof Function)) {
           return;
         }
 
@@ -183,16 +188,6 @@ var AopUtil = (function() {
 
         // Default strategy for advices is no in, no out, and do nothing.
         var realStrategy = (strategy instanceof Object ? strategy[funcName] : strategy) || 0;
-        
-        // Give it an empty function so it can be removed when clearing.
-        if (!target.hasOwnProperty(funcName)) {
-          target[funcName] = emptyFunc;
-          realRule = LC.DEFAULT_RULE;
-          realStrategy = self.ALLOW_IN + self.ALLOW_OUT + self.FORCE_QUIT;
-        }
-        if (!target[funcName] instanceof Function) {
-          return;
-        }
 
         self[realRule](target, funcName, aspect[funcName], realStrategy);
       });
@@ -210,9 +205,7 @@ var AopUtil = (function() {
           return;
         }
         self.clearAdvice(target, funcName);
-        if (target[funcName] === emptyFunc) {
-          delete target[funcName];
-        }
+        target[funcName] === randCode && (delete target[funcName]);
       });
     }
   };

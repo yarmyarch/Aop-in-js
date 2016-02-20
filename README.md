@@ -149,7 +149,7 @@ var beforeAspect = {
     return value;
   },
   test: function(value) {
-    console.log('advice added: ' + value);
+    console.log('advice added to non-existing function: ' + value);
     return value;
   }
 }
@@ -169,28 +169,56 @@ var afterAspect2 = {
   demo: function(value) {
     console.log('after advice with strategy ALLOW_IN applied: ' + value);
     return value;
+  },
+  test: function(value) {
+    console.log('after advice for non-existing function should work: ' + ++value);
+    return value;
   }
 }
 AopUtil.applyAspect(obj, afterAspect2, {
-  demo: 'after'
+  demo: 'after',
+  test: 'after'
 }, {
-  demo: AopUtil.ALLOW_IN
+  demo: AopUtil.ALLOW_IN,
+  test: AopUtil.ALLOW_IN + AopUtil.ALLOW_OUT
 });
+```
+#### Force quit
+```js
+var afterAspect3 = {
+  test: function(value) {
+    console.log('all other advices after this guy won\'t be executed: ' + ++value);
+    return value;
+  }
+};
+var afterAspect4 = {
+  test: function(value) {
+    console.log('nothing to do with this guy: ' + ++value);
+    return value;
+  }
+};
+AopUtil.applyAspect(obj, afterAspect3, 'after', AopUtil.ALLOW_IN + AopUtil.FORCE_QUIT);
+AopUtil.applyAspect(obj, afterAspect4, 'after');
 ```
 #### All together
 ```js
-obj.demo(1,1);
+console.log(obj.demo(1,1));
 // before aspect applied
 // before demo
 // demo
 // after demo
 // after aspect applied
 // after aspect with strategy ALLOW_IN applied: 2
-// Final result of demo: (1 * 2 - 1) * 2
+// 2, the final result of demo: (1 * 2 - 1) * 2
 
-obj.test(1);
-// advice added: 1
+console.log('\n');
+console.log(obj.test(1));
+// advice added to non-existing function: 1
+// after advice for non-existing function should work: 2
+// all other advices after this guy won't be executed: 3
+// 2, the final result of test while afterAspect3 doesn't allow out: 1 + 1
 
+console.log('\n');
 AopUtil.clearAspect(obj);
 console.log(obj.demo(1,1)); // 0
 console.log(obj.test); // undefined

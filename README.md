@@ -95,7 +95,8 @@ AopUtil.clearAdvice(obj, funcName);
  * Applies an set of 'advice' to the target object. It applies functions defined in 'aspect' to the target object
  * using specific rules. If a function defined in target exists in 'aspect', the advice would be used before (or
  * after regarding to the rules given) the target function. If it not exist, the advice would be applied directly
- * as a function of the target.
+ * as a function of the target. If the advice given is the last 'before' or the first 'after' to an non-exsiting
+ * function name, it would be applied with strategy 3 by force so it acts like the default function when it exists.
  *
  * @param {Object} target - Target to which those advices would be applied.
  * @param {Object<String, Function>} aspect - An object containing set of functions that would be used as advices.

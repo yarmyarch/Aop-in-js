@@ -120,10 +120,12 @@ var AopUtil = (function() {
      * @param {int} [strategy] - Optional, the strategy code.
      */
     before: function(obj, methodName, advice, strategy) {
-      getAdviceChain(obj, methodName).unshift({
+      var chain = getAdviceChain(obj, methodName);
+      hain.unshift({
         method : advice,
         // Default strategy: using original parameters, returned value won't be parsed into the next advice.
-        strategy : strategy || 0
+        // Set the strategy to 3 if it's the first advice attached before an nonexsiting function name.
+        strategy : chain[0].method == randCode ? 3 : (strategy || 0)
       });
     },
 
@@ -138,9 +140,10 @@ var AopUtil = (function() {
      * @param {int} [strategy] - Optional, the strategy code.
      */
     after: function(obj, methodName, advice, strategy) {
-      getAdviceChain(obj, methodName).push({
+      var chain = getAdviceChain(obj, methodName);
+      chain.push({
         method : advice,
-        strategy : strategy || 0
+        strategy : chain[chain.length - 1].method == randCode ? 3 : (strategy || 0)
       });
     },
 
@@ -161,10 +164,11 @@ var AopUtil = (function() {
     },
     
     /**
-     * Applies an set of 'Advices' to the target object. It applies functions defined in 'aspect' to the target object
-     * using specific rules. If a function defined in target exists in 'aspect', the aspect would be used before (or
-     * after regarding to the rules given) the target function. If it not exist, the aspect would be applied directly
-     * as a function of the target.
+     * Applies an set of 'advice' to the target object. It applies functions defined in 'aspect' to the target object
+     * using specific rules. If a function defined in target exists in 'aspect', the advice would be used before (or
+     * after regarding to the rules given) the target function. If it not exist, the advice would be applied directly
+     * as a function of the target. If the advice given is the last 'before' or the first 'after' to an non-exsiting
+     * function name, it would be applied with strategy 3 by force so it acts like the default function when it exists.
      *
      * @param {Object} target - Target to which those advices would be applied.
      * @param {Object<String, Function>} aspect - An object containing set of functions that would be used as advices.

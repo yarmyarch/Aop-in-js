@@ -121,7 +121,7 @@ var AopUtil = (function() {
      */
     before: function(obj, methodName, advice, strategy) {
       var chain = getAdviceChain(obj, methodName);
-      hain.unshift({
+      chain.unshift({
         method : advice,
         // Default strategy: using original parameters, returned value won't be parsed into the next advice.
         // Set the strategy to 3 if it's the first advice attached before an nonexsiting function name.

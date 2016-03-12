@@ -84,6 +84,16 @@ AopUtil.before(obj, funcName, advice[, strategy]);
 AopUtil.after(obj, funcName, advice[, strategy]);
 
 /**
+ * Gets the original function without any advices appended. Return the function itself if it's never mocked.
+ *
+ * @param {Object} obj - Object that was mocked.
+ * @param {String} funcName - The name of the mocked function.
+ *
+ * @return {Function} - The original function with 'this' bind to obj.
+ */
+AopUtil.getOrigin(obj, methodName);
+
+/**
  * Clear all advices bind to target function.
  *
  * @param {Object} obj - Object that was mocked.

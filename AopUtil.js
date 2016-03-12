@@ -83,7 +83,9 @@ var AopUtil = (function() {
   };
     
   var attachToAop = function(obj, methodName, strategy) {
-    if (!obj.hasOwnProperty(methodName)) {
+    // Can't use 'hasOwnProperty' as we'll miss functions defined from prototype.
+    // I hate prototype-style-class-defination.
+    if (obj[methodName] === undefined) {
       obj[methodName] = randCode;
     }
     var sourceMethod = obj[methodName];
@@ -145,6 +147,23 @@ var AopUtil = (function() {
         method : advice,
         strategy : chain[chain.length - 1].method == randCode ? 3 : (strategy || 0)
       });
+    },
+
+    /**
+     * Gets the original function without any advices appended. Return the function itself if it's never mocked.
+     *
+     * @param {Object} obj - Object that was mocked.
+     * @param {String} funcName - The name of the mocked function.
+     *
+     * @return {Function} - The original function with 'this' bind to obj.
+     */
+    getOrigin: function(obj, methodName) {
+      var aspectIndex = getAspectIndex(obj, methodName);
+      if (aspectIndex === -1 && obj[methodName] instanceof Function) {
+        return obj[methodName].bind(this);
+      }
+      var backup = aspects[methodName][aspectIndex].backup;
+      return backup.bind && backup.bind(obj) || backup;
     },
 
     /**

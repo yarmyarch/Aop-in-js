@@ -130,7 +130,7 @@ AopUtil.clearAspect(target);
 
 ### Demo
 #### Basic Before and After
-```
+```js
 var AopUtil = require('js_aop');
 
 var obj = {};
